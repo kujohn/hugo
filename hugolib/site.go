@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -71,6 +72,7 @@ var distinctErrorLogger = helpers.NewDistinctErrorLogger()
 type Site struct {
 	Pages          Pages
 	Files          []*source.File
+	Assets         Assets
 	Tmpl           tpl.Template
 	Taxonomies     TaxonomyList
 	Source         source.Input
@@ -375,6 +377,12 @@ func (s *Site) Process() (err error) {
 	if err = s.CreatePages(); err != nil {
 		return
 	}
+
+	s.timerStep("process assets pipeline")
+	if err = s.ProcessAssets(); err != nil {
+		return
+	}
+
 	s.setupPrevNext()
 	s.timerStep("import pages")
 	if err = s.BuildSiteMeta(); err != nil {
@@ -520,6 +528,11 @@ func (s *Site) checkDirectories() (err error) {
 type pageResult struct {
 	page *Page
 	err  error
+}
+
+func (s *Site) ProcessAssets() error {
+	log.Println(s.Files)
+	return nil
 }
 
 func (s *Site) CreatePages() error {
